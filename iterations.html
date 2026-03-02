@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Iterations — BCG Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #f6f6f6;
+    --white: #ffffff;
+    --green: #177a47;
+    --dark: #1a1a1a;
+    --mid: #6b6b6b;
+    --light: #a0a0a0;
+    --border: #e2e2e2;
+    --danger: #b91c1c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; display: flex; font-size: 14px; line-height: 1.5; }
+
+  /* SIDEBAR */
+  .sidebar { width: 232px; min-height: 100vh; background: #161616; border-right: 1px solid #2c2c2c; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+  .sidebar-logo { padding: 26px 22px 22px; border-bottom: 1px solid rgba(255,255,255,0.09); display: flex; align-items: center; gap: 10px; }
+  .logo-text { font-family: 'Libre Baskerville', serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .logo-sub { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.8px; text-transform: uppercase; }
+  .nav-group-label { font-size: 9px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,0.22); padding: 20px 22px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 9px 22px; font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.48); border-left: 2px solid transparent; transition: all 0.12s; }
+  .nav-item i { width: 16px; text-align: center; font-size: 12px; flex-shrink: 0; color: inherit; }
+  .nav-item:hover { color: rgba(255,255,255,0.82); background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: #fff; font-weight: 500; border-left-color: var(--green); background: rgba(23,122,71,0.16); }
+  .nav-item.active i { color: var(--green); }
+  .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
+  .sidebar-bottom { margin-top: auto; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.09); display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .user-name { font-size: 11px; font-weight: 500; color: #fff; line-height: 1.3; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.38); font-weight: 300; }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; padding: 36px 40px 60px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); margin-bottom: 5px; }
+  .page-title { font-family: 'Libre Baskerville', serif; font-size: 27px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; line-height: 1.15; }
+  .page-sub { font-size: 13px; color: var(--mid); margin-top: 5px; font-weight: 300; font-style: italic; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0 36px; }
+
+  /* ITERATION WRAPPER */
+  .iter-section { margin-bottom: 52px; }
+  .iter-label-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .iter-badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border); color: var(--light); background: var(--white); }
+  .iter-badge.final { border-color: #b8dfc9; color: var(--green); }
+  .iter-name { font-family: 'Libre Baskerville', serif; font-size: 17px; font-weight: 700; color: var(--dark); }
+  .iter-desc { font-size: 12px; color: var(--light); font-style: italic; }
+  .iter-note { font-size: 12px; color: var(--mid); line-height: 1.65; margin-top: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+
+  /* SCREEN FRAME */
+  .screen-frame { border: 1px solid #ccc; border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .screen-bar { background: #e8e8e8; padding: 8px 12px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #d0d0d0; }
+  .screen-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .screen-url { flex: 1; background: #fff; border-radius: 3px; font-size: 10px; color: #999; padding: 3px 8px; margin-left: 8px; }
+  .screen-inner { transform-origin: top left; }
+
+  /* ════════════════════════════════
+     ITERATION 1 — LOW FIDELITY
+  ════════════════════════════════ */
+  .lofi {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    min-height: 500px;
+    display: flex;
+  }
+
+  .lofi-sidebar {
+    width: 180px; background: #d0d0d0; padding: 16px 12px;
+    display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+    border-right: 2px solid #b0b0b0;
+  }
+  .lofi-logo-box { background: #a0a0a0; height: 32px; border-radius: 3px; margin-bottom: 12px; }
+  .lofi-nav-item { background: #c0c0c0; height: 20px; border-radius: 2px; width: 100%; }
+  .lofi-nav-item.active { background: #888; }
+  .lofi-nav-section { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 8px 0 4px; font-weight: 700; }
+  .lofi-user { margin-top: auto; padding-top: 12px; display: flex; gap: 8px; align-items: center; }
+  .lofi-avatar { width: 28px; height: 28px; border-radius: 50%; background: #999; }
+  .lofi-user-lines { display: flex; flex-direction: column; gap: 4px; }
+  .lofi-user-line { background: #b0b0b0; height: 7px; border-radius: 2px; }
+
+  .lofi-main { flex: 1; padding: 18px 20px; }
+  .lofi-title-area { margin-bottom: 14px; }
+  .lofi-h1 { background: #bbb; height: 20px; width: 55%; border-radius: 2px; margin-bottom: 6px; }
+  .lofi-sub { background: #ccc; height: 10px; width: 75%; border-radius: 2px; }
+  .lofi-alert { background: #ddd; border-left: 3px solid #aaa; padding: 8px 10px; margin-bottom: 14px; border-radius: 2px; }
+  .lofi-alert-line1 { background: #bbb; height: 9px; width: 60%; border-radius: 2px; margin-bottom: 5px; }
+  .lofi-alert-line2 { background: #ccc; height: 7px; width: 90%; border-radius: 2px; }
+  .lofi-alert-line3 { background: #ccc; height: 7px; width: 70%; border-radius: 2px; margin-top: 3px; }
+
+  .lofi-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .lofi-kpi { background: #e8e8e8; border: 1px solid #ccc; border-radius: 3px; padding: 10px 10px 8px; }
+  .lofi-kpi-lbl { background: #ccc; height: 7px; width: 70%; border-radius: 1px; margin-bottom: 8px; }
+  .lofi-kpi-val { background: #aaa; height: 22px; width: 45%; border-radius: 2px; margin-bottom: 5px; }
+  .lofi-kpi-sub { background: #ccc; height: 7px; width: 85%; border-radius: 1px; }
+
+  .lofi-charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .lofi-charts-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .lofi-chart-box { background: #e8e8e8; border: 1px solid #ccc; border-radius: 3px; padding: 10px; }
+  .lofi-chart-title { background: #bbb; height: 9px; width: 55%; border-radius: 1px; margin-bottom: 4px; }
+  .lofi-chart-sub { background: #ccc; height: 7px; width: 40%; border-radius: 1px; margin-bottom: 10px; }
+  .lofi-chart-area {
+    height: 90px; background: #ddd; border-radius: 2px;
+    display: flex; align-items: flex-end; gap: 3px; padding: 6px 6px 0;
+    overflow: hidden;
+  }
+  .lofi-bar { background: #b0b0b0; border-radius: 1px 1px 0 0; flex: 1; }
+  .lofi-line-area { height: 90px; background: #ddd; border-radius: 2px; position: relative; overflow: hidden; }
+  .lofi-line-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .lofi-table { background: #e8e8e8; border: 1px solid #ccc; border-radius: 3px; overflow: hidden; }
+  .lofi-table-head { background: #d0d0d0; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 1px; padding: 6px 10px; }
+  .lofi-table-hcell { background: #bbb; height: 8px; border-radius: 1px; }
+  .lofi-table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 1px; padding: 7px 10px; border-top: 1px solid #d0d0d0; }
+  .lofi-table-cell { background: #ccc; height: 8px; border-radius: 1px; }
+
+  /* ════════════════════════════════
+     ITERATION 2 — MEDIUM FIDELITY
+  ════════════════════════════════ */
+  .midfi {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #f4f4f4;
+    min-height: 560px;
+    display: flex;
+    font-size: 11px;
+  }
+
+  .midfi-sidebar {
+    width: 170px; background: #2a2a2a; padding: 0;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .midfi-logo { padding: 14px 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+  .midfi-logo-sq { width: 26px; height: 26px; background: #15734e; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .midfi-logo-sq span { color: #fff; font-weight: 700; font-size: 9px; letter-spacing: 0.5px; }
+  .midfi-logo-text { color: #fff; font-size: 11px; font-weight: 600; }
+  .midfi-logo-sub { color: rgba(255,255,255,0.35); font-size: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .midfi-nav-lbl { font-size: 8px; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 1px; padding: 12px 14px 4px; font-weight: 600; }
+  .midfi-nav-item { padding: 7px 14px; color: rgba(255,255,255,0.5); font-size: 10px; display: flex; align-items: center; gap: 7px; border-left: 2px solid transparent; }
+  .midfi-nav-item.active { color: #fff; border-left-color: #177a47; background: rgba(23,122,71,0.15); }
+  .midfi-user { margin-top: auto; padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px; }
+  .midfi-avatar { width: 26px; height: 26px; border-radius: 50%; background: #177a47; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; }
+
+  .midfi-main { flex: 1; padding: 16px 18px; overflow: hidden; }
+  .midfi-topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .midfi-h1 { font-size: 17px; font-weight: 700; color: #1a1a1a; font-family: 'Libre Baskerville', serif; }
+  .midfi-sub { font-size: 9px; color: #888; margin-top: 2px; }
+  .midfi-btn { background: #177a47; color: #fff; border: none; border-radius: 4px; padding: 5px 10px; font-size: 9px; font-family: inherit; cursor: pointer; }
+
+  .midfi-alert { background: #fff; border: 1px solid #ddd; border-left: 3px solid #c0392b; border-radius: 4px; padding: 7px 10px; margin-bottom: 12px; }
+  .midfi-alert-title { font-size: 10px; font-weight: 600; color: #c0392b; margin-bottom: 2px; }
+  .midfi-alert-body { font-size: 9px; color: #666; line-height: 1.5; }
+
+  .midfi-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 12px; }
+  .midfi-kpi { background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 9px 10px; }
+  .midfi-kpi-lbl { font-size: 8px; font-weight: 600; text-transform: uppercase; color: #aaa; letter-spacing: 0.4px; margin-bottom: 5px; }
+  .midfi-kpi-val { font-size: 20px; font-weight: 700; color: #1a1a1a; font-family: 'Libre Baskerville', serif; line-height: 1; margin-bottom: 3px; }
+  .midfi-kpi-trend { font-size: 9px; }
+
+  .midfi-section { font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #bbb; margin: 12px 0 7px; }
+
+  .midfi-charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .midfi-chart { background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 9px 10px; }
+  .midfi-chart-title { font-size: 10px; font-weight: 600; color: #222; margin-bottom: 2px; }
+  .midfi-chart-sub { font-size: 8px; color: #aaa; margin-bottom: 8px; }
+  .midfi-chart-area { height: 80px; display: flex; align-items: flex-end; gap: 3px; }
+  .midfi-bar { border-radius: 2px 2px 0 0; flex: 1; }
+
+  /* TILE MAP */
+  .midfi-map-card { background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 9px 10px; }
+  .midfi-map-title { font-size: 10px; font-weight: 600; color: #222; margin-bottom: 2px; }
+  .midfi-map-sub { font-size: 8px; color: #aaa; margin-bottom: 8px; }
+  .tile-map { display: grid; gap: 2px; font-size: 6px; color: #fff; font-weight: 700; letter-spacing: 0.2px; }
+  .tile { width: 20px; height: 16px; border-radius: 1px; display: flex; align-items: center; justify-content: center; }
+  .tile.b1 { background: #b3d9f5; color: #1a4a70; }
+  .tile.b2 { background: #7bbde8; color: #fff; }
+  .tile.b3 { background: #4a9ed4; color: #fff; }
+  .tile.b4 { background: #2878b4; color: #fff; }
+  .tile.b5 { background: #1a5a8a; color: #fff; }
+  .tile.empty { background: transparent; }
+  .map-legend { display: flex; align-items: center; gap: 4px; margin-top: 7px; }
+  .map-legend-bar { flex: 1; height: 6px; border-radius: 2px; background: linear-gradient(to right, #b3d9f5, #1a5a8a); }
+  .map-legend-label { font-size: 8px; color: #aaa; }
+
+  .midfi-table-section { background: #fff; border: 1px solid #ddd; border-radius: 5px; overflow: hidden; }
+  .midfi-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+  .midfi-table th { background: #f5f5f5; border-bottom: 1px solid #ddd; padding: 6px 8px; text-align: left; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-size: 8px; }
+  .midfi-table td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: middle; }
+  .midfi-table tr:last-child td { border-bottom: none; }
+  .seg-color { display: inline-block; width: 8px; height: 8px; border-radius: 1px; margin-right: 4px; vertical-align: middle; }
+  .mid-pill { display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px; border-radius: 3px; font-size: 8px; font-weight: 600; }
+  .mid-pill.g { color: #177a47; border: 1px solid #b8dfc9; }
+  .mid-pill.r { color: #c0392b; border: 1px solid #f5c6c6; }
+  .mid-pill.a { color: #b45309; border: 1px solid #f0d083; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 200 200" style="border-radius:5px;flex-shrink:0">
+      <path d="M0,0 H200 V200 H0 z" style="fill:#15734e;fill-rule:evenodd"/>
+      <path d="m72.28,83.63 c8.73,-12.24 27.23,-15.16 39.58,-6.83 c-2.07,3.05 -4,6.2 -6,9.3 c-6.04,-4.35 -14.77,-4.47 -20.76,0.03 c-7.17,4.87 -9.58,15.4 -4.84,22.76 c5.01,8.68 17.81,11.39 25.64,4.9 c6.69,-4.9 6.65,-13.85 8.88,-21.08 c2.68,-9.11 10.06,-16.91 19.3,-19.46 c8.32,-2.33 17.74,-1.22 24.93,3.73 c-2.03,3.07 -3.95,6.2 -5.92,9.3 c-4.28,-3.07 -9.95,-4.29 -15.06,-2.84 c-7.62,1.92 -13.18,9.66 -12.64,17.49 c0.18,8.7 7.79,16.55 16.59,16.54 c7.21,0.4 13.52,-4.98 15.64,-11.65 c-5.58,-0.07 -11.15,0.03 -16.72,-0.05 c1.89,-3.6 4.29,-6.89 6.44,-10.33 c7.3,0.03 14.61,-0.09 21.91,0.08 c1.38,10.08 -2.43,20.89 -10.68,27.06 c-12.05,9.63 -31.5,6.36 -40.07,-6.35 c-4.58,6.28 -11.65,10.8 -19.42,11.68 c-9.22,1.4 -18.87,-2.1 -25.19,-8.92 c-3.03,4.62 -8.22,7.85 -13.82,7.92 c-9.76,0.23 -19.55,0.34 -29.31,-0.04 c0.09,-17.87 0.06,-35.73 0.02,-53.6 c8.78,-0.03 17.56,-0.07 26.34,0.01 c6.46,0.13 13.02,4.07 15.16,10.35 zm-29.83,-0.26 c0.13,3.84 0.08,7.68 0.07,11.53 c4.52,-0.02 9.04,0.08 13.56,-0.02 c3.11,0.1 5.96,-2.79 5.7,-5.91 c0.11,-3.05 -2.69,-5.8 -5.72,-5.7 c-4.54,-0.08 -9.08,-0.09 -13.61,0.1 zm0.11,21.38 c-0.06,4.11 -0.05,8.21 0,12.32 c5.16,-0.04 10.32,0.06 15.47,-0.01 c3.07,0.17 6.2,-2.01 6.66,-5.12 c0.77,-3.47 -2.19,-6.94 -5.66,-7.08 c-5.48,-0.2 -10.98,0.04 -16.47,-0.11 z" style="fill:#fefefe;fill-rule:evenodd"/>
+    </svg>
+    <div>
+      <div class="logo-text">BCG Dashboard</div>
+      <div class="logo-sub">Manager View</div>
+    </div>
+  </div>
+  <span class="nav-group-label">Overview</span>
+  <a class="nav-item" href="storage-dashboard-v2.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-triangle-exclamation"></i> Alerts <span class="nav-badge">1</span></a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-chart-line"></i> Market Trends</a>
+  <span class="nav-group-label">Storage Types</span>
+  <a class="nav-item" href="#"><i class="fa-solid fa-hard-drive"></i> Block Storage</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-folder-open"></i> File Storage</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-box-archive"></i> Object Storage</a>
+  <span class="nav-group-label">Operations</span>
+  <a class="nav-item" href="#"><i class="fa-solid fa-cloud"></i> Cloud Migration</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-file-lines"></i> Reports</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+  <span class="nav-group-label">Design Process</span>
+  <a class="nav-item active" href="iterations.html"><i class="fa-solid fa-layer-group"></i> Iterations</a>
+  <a class="nav-item" href="annotations.html"><i class="fa-solid fa-pen-ruler"></i> Annotations</a>
+  <div class="sidebar-bottom">
+    <div class="user-avatar">RL</div>
+    <div>
+      <div class="user-name">Rabii Lamharzi Alaoui</div>
+      <div class="user-role">Middle Manager</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="page-eyebrow">Design Process</div>
+  <div class="page-title">Design Iterations</div>
+  <div class="page-sub">From rough wireframe to final design — two rounds of iteration</div>
+  <div class="divider"></div>
+
+  <!-- ── ITERATION 1 ── -->
+  <div class="iter-section">
+    <div class="iter-label-row">
+      <div class="iter-badge">Iteration 01</div>
+      <div>
+        <div class="iter-name">Low Fidelity — First Draft</div>
+        <div class="iter-desc">Layout structure only. No visual styling, no real data. Just boxes.</div>
+      </div>
+    </div>
+
+    <div class="screen-frame">
+      <div class="screen-bar">
+        <div class="screen-dot" style="background:#ff5f57"></div>
+        <div class="screen-dot" style="background:#febc2e"></div>
+        <div class="screen-dot" style="background:#28c840"></div>
+        <div class="screen-url">storage-dashboard — draft 01</div>
+      </div>
+      <div class="screen-inner">
+        <div class="lofi">
+          <!-- Sidebar -->
+          <div class="lofi-sidebar">
+            <div class="lofi-logo-box"></div>
+            <div class="lofi-nav-section">Overview</div>
+            <div class="lofi-nav-item active"></div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-nav-section">Storage</div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-nav-section">Ops</div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-nav-item"></div>
+            <div class="lofi-user">
+              <div class="lofi-avatar"></div>
+              <div class="lofi-user-lines">
+                <div class="lofi-user-line" style="width:70px"></div>
+                <div class="lofi-user-line" style="width:50px"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main -->
+          <div class="lofi-main">
+            <div class="lofi-title-area">
+              <div class="lofi-h1"></div>
+              <div class="lofi-sub"></div>
+            </div>
+
+            <!-- Alert box -->
+            <div class="lofi-alert">
+              <div class="lofi-alert-line1"></div>
+              <div class="lofi-alert-line2"></div>
+              <div class="lofi-alert-line3"></div>
+            </div>
+
+            <!-- KPI row -->
+            <div class="lofi-kpi-row">
+              <div class="lofi-kpi">
+                <div class="lofi-kpi-lbl"></div>
+                <div class="lofi-kpi-val"></div>
+                <div class="lofi-kpi-sub"></div>
+              </div>
+              <div class="lofi-kpi">
+                <div class="lofi-kpi-lbl"></div>
+                <div class="lofi-kpi-val"></div>
+                <div class="lofi-kpi-sub"></div>
+              </div>
+              <div class="lofi-kpi">
+                <div class="lofi-kpi-lbl"></div>
+                <div class="lofi-kpi-val"></div>
+                <div class="lofi-kpi-sub"></div>
+              </div>
+              <div class="lofi-kpi">
+                <div class="lofi-kpi-lbl"></div>
+                <div class="lofi-kpi-val"></div>
+                <div class="lofi-kpi-sub"></div>
+              </div>
+            </div>
+
+            <!-- Chart row 1 -->
+            <div class="lofi-charts-row">
+              <div class="lofi-chart-box">
+                <div class="lofi-chart-title"></div>
+                <div class="lofi-chart-sub"></div>
+                <div class="lofi-chart-area">
+                  <div class="lofi-bar" style="height:55%"></div>
+                  <div class="lofi-bar" style="height:60%"></div>
+                  <div class="lofi-bar" style="height:58%"></div>
+                  <div class="lofi-bar" style="height:62%"></div>
+                  <div class="lofi-bar" style="height:65%"></div>
+                  <div class="lofi-bar" style="height:70%"></div>
+                  <div class="lofi-bar" style="height:72%"></div>
+                  <div class="lofi-bar" style="height:75%"></div>
+                  <div class="lofi-bar" style="height:78%"></div>
+                  <div class="lofi-bar" style="height:80%"></div>
+                </div>
+              </div>
+              <div class="lofi-chart-box">
+                <div class="lofi-chart-title"></div>
+                <div class="lofi-chart-sub"></div>
+                <div class="lofi-line-area">
+                  <svg class="lofi-line-svg" viewBox="0 0 100 90" preserveAspectRatio="none">
+                    <polyline points="5,70 35,55 65,42 95,28" fill="none" stroke="#b0b0b0" stroke-width="2"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart row 2 -->
+            <div class="lofi-charts-row" style="margin-top:8px">
+              <div class="lofi-chart-box">
+                <div class="lofi-chart-title"></div>
+                <div class="lofi-chart-sub"></div>
+                <div class="lofi-line-area">
+                  <svg class="lofi-line-svg" viewBox="0 0 100 90" preserveAspectRatio="none">
+                    <polyline points="5,75 20,60 35,45 50,30 65,18 95,8" fill="none" stroke="#c0c0c0" stroke-width="2"/>
+                    <polyline points="5,82 20,79 35,75 50,72 65,68 95,62" fill="none" stroke="#b0b0b0" stroke-width="2" stroke-dasharray="3,2"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="lofi-chart-box">
+                <div class="lofi-chart-title"></div>
+                <div class="lofi-chart-sub"></div>
+                <div class="lofi-chart-area">
+                  <div class="lofi-bar" style="height:45%"></div>
+                  <div class="lofi-bar" style="height:50%"></div>
+                  <div class="lofi-bar" style="height:52%"></div>
+                  <div class="lofi-bar" style="height:58%"></div>
+                  <div class="lofi-bar" style="height:65%"></div>
+                  <div class="lofi-bar" style="height:72%"></div>
+                  <div class="lofi-bar" style="height:78%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="lofi-table" style="margin-top:8px">
+              <div class="lofi-table-head">
+                <div class="lofi-table-hcell"></div>
+                <div class="lofi-table-hcell"></div>
+                <div class="lofi-table-hcell"></div>
+                <div class="lofi-table-hcell"></div>
+                <div class="lofi-table-hcell"></div>
+              </div>
+              <div class="lofi-table-row">
+                <div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div>
+              </div>
+              <div class="lofi-table-row">
+                <div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div>
+              </div>
+              <div class="lofi-table-row">
+                <div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div><div class="lofi-table-cell"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="iter-note">
+      <strong>What this explored:</strong> Pure layout skeleton — sidebar, KPI row, two chart rows, and a table. No colors, no real content, just confirming the information hierarchy made sense before investing time in visual design. Charts are represented as grey bar and line placeholders.
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:36px;color:var(--light);font-size:12px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <i class="fa-solid fa-arrow-down" style="font-size:13px"></i>
+    <span>Color system and geographic view introduced</span>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+
+  <!-- ── ITERATION 2 ── -->
+  <div class="iter-section">
+    <div class="iter-label-row">
+      <div class="iter-badge">Iteration 02</div>
+      <div>
+        <div class="iter-name">Medium Fidelity — Geographic Map Exploration</div>
+        <div class="iter-desc">Color and real data introduced. Tested a geographic map for regional storage distribution.</div>
+      </div>
+    </div>
+
+    <div class="screen-frame">
+      <div class="screen-bar">
+        <div class="screen-dot" style="background:#ff5f57"></div>
+        <div class="screen-dot" style="background:#febc2e"></div>
+        <div class="screen-dot" style="background:#28c840"></div>
+        <div class="screen-url">storage-dashboard — draft 02</div>
+      </div>
+      <div class="screen-inner">
+        <div class="midfi">
+
+          <!-- Sidebar -->
+          <div class="midfi-sidebar">
+            <div class="midfi-logo">
+              <div class="midfi-logo-sq"><span>BCG</span></div>
+              <div>
+                <div class="midfi-logo-text">StorageIQ</div>
+                <div class="midfi-logo-sub">Manager View</div>
+              </div>
+            </div>
+            <div class="midfi-nav-lbl">Overview</div>
+            <div class="midfi-nav-item active"><i class="fa-solid fa-gauge-high" style="font-size:9px;width:12px"></i> Dashboard</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-triangle-exclamation" style="font-size:9px;width:12px"></i> Alerts</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-chart-line" style="font-size:9px;width:12px"></i> Trends</div>
+            <div class="midfi-nav-lbl">Storage</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-hard-drive" style="font-size:9px;width:12px"></i> Block</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-folder-open" style="font-size:9px;width:12px"></i> File</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-box-archive" style="font-size:9px;width:12px"></i> Object</div>
+            <div class="midfi-nav-lbl">Operations</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-cloud" style="font-size:9px;width:12px"></i> Cloud</div>
+            <div class="midfi-nav-item"><i class="fa-solid fa-file-lines" style="font-size:9px;width:12px"></i> Reports</div>
+            <div class="midfi-user">
+              <div class="midfi-avatar">RL</div>
+              <div>
+                <div style="color:#fff;font-size:9px;font-weight:500">R. Lamharzi</div>
+                <div style="color:rgba(255,255,255,0.4);font-size:8px">Middle Manager</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main -->
+          <div class="midfi-main">
+            <div class="midfi-topbar">
+              <div>
+                <div class="midfi-h1">Storage Overview</div>
+                <div class="midfi-sub">Enterprise data storage — 2021 to 2025 forecast</div>
+              </div>
+              <button class="midfi-btn"><i class="fa-solid fa-download" style="font-size:8px;margin-right:4px"></i>Export</button>
+            </div>
+
+            <!-- Alert -->
+            <div class="midfi-alert">
+              <div class="midfi-alert-title"><i class="fa-solid fa-circle-exclamation" style="font-size:9px;margin-right:4px"></i>Storage capacity may fall short within the next two years</div>
+              <div class="midfi-alert-body">Data creation grows at 23% per year, storage only at 19%. The gap compounds annually.</div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="midfi-kpi-row">
+              <div class="midfi-kpi">
+                <div class="midfi-kpi-lbl">Market Size</div>
+                <div class="midfi-kpi-val">$37B</div>
+                <div class="midfi-kpi-trend" style="color:#2d7550">+5% per year</div>
+              </div>
+              <div class="midfi-kpi">
+                <div class="midfi-kpi-lbl">Object Growth</div>
+                <div class="midfi-kpi-val">+10%</div>
+                <div class="midfi-kpi-trend" style="color:#2d7550">Fastest segment</div>
+              </div>
+              <div class="midfi-kpi">
+                <div class="midfi-kpi-lbl">Cloud Share</div>
+                <div class="midfi-kpi-val">41%</div>
+                <div class="midfi-kpi-trend" style="color:#b45309">Up from 36%</div>
+              </div>
+              <div class="midfi-kpi">
+                <div class="midfi-kpi-lbl">Capacity Gap</div>
+                <div class="midfi-kpi-val">4 pts</div>
+                <div class="midfi-kpi-trend" style="color:#c0392b">Widening</div>
+              </div>
+            </div>
+
+            <div class="midfi-section">Market Overview</div>
+
+            <!-- Charts + Map -->
+            <div class="midfi-charts-row">
+
+              <!-- Stacked bar chart -->
+              <div class="midfi-chart">
+                <div class="midfi-chart-title">Storage Market by Type</div>
+                <div class="midfi-chart-sub">In billions of dollars, 2016 to 2025</div>
+                <div class="midfi-chart-area">
+                  <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:1px;flex:1;height:100%">
+                    <div style="display:flex;align-items:flex-end;gap:2px;height:100%">
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+                        <div style="background:#a8d870;height:35px;border-radius:1px 1px 0 0"></div>
+                        <div style="background:#2d7550;height:15px"></div>
+                        <div style="background:#4db870;height:2px"></div>
+                      </div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+                        <div style="background:#a8d870;height:37px;border-radius:1px 1px 0 0"></div>
+                        <div style="background:#2d7550;height:16px"></div>
+                        <div style="background:#4db870;height:3px"></div>
+                      </div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+                        <div style="background:#a8d870;height:38px;border-radius:1px 1px 0 0"></div>
+                        <div style="background:#2d7550;height:20px"></div>
+                        <div style="background:#4db870;height:4px"></div>
+                      </div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+                        <div style="background:#a8d870;height:40px;border-radius:1px 1px 0 0"></div>
+                        <div style="background:#2d7550;height:19px"></div>
+                        <div style="background:#4db870;height:5px"></div>
+                      </div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+                        <div style="background:#a8d870;height:43px;border-radius:1px 1px 0 0"></div>
+                        <div style="background:#2d7550;height:20px"></div>
+                        <div style="background:#4db870;height:7px"></div>
+                      </div>
+                      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+                        <div style="background:#a8d870;height:46px;border-radius:1px 1px 0 0"></div>
+                        <div style="background:#2d7550;height:22px"></div>
+                        <div style="background:#4db870;height:8px"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Regional map -->
+              <div class="midfi-map-card" style="grid-column: span 2">
+                <div class="midfi-map-title">Storage Deployment by Region</div>
+                <div class="midfi-map-sub">Enterprise storage utilization across US — darker = higher usage</div>
+
+                <!-- US Tile Map -->
+                <div style="overflow:hidden">
+                  <svg viewBox="0 0 460 280" width="100%" style="max-height:160px">
+                    <!-- Background -->
+                    <rect width="460" height="280" fill="#f8f8f8"/>
+
+                    <!-- Simple US map using rectangles for regions, approximate -->
+                    <!-- Pacific Northwest -->
+                    <rect x="20" y="30" width="50" height="40" rx="2" fill="#b3d9f5" opacity="0.9"/>
+                    <text x="45" y="54" font-size="8" fill="#1a4a70" text-anchor="middle" font-family="Arial">WA</text>
+                    <rect x="20" y="75" width="50" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="45" y="99" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">OR</text>
+                    <rect x="20" y="120" width="50" height="60" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="45" y="154" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">CA</text>
+
+                    <!-- Mountain states -->
+                    <rect x="75" y="30" width="45" height="40" rx="2" fill="#b3d9f5" opacity="0.9"/>
+                    <text x="97" y="54" font-size="8" fill="#1a4a70" text-anchor="middle" font-family="Arial">MT</text>
+                    <rect x="75" y="75" width="45" height="40" rx="2" fill="#b3d9f5" opacity="0.9"/>
+                    <text x="97" y="99" font-size="8" fill="#1a4a70" text-anchor="middle" font-family="Arial">ID</text>
+                    <rect x="75" y="120" width="45" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="97" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">NV</text>
+                    <rect x="75" y="165" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="97" y="189" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">AZ</text>
+
+                    <!-- Plains -->
+                    <rect x="125" y="30" width="45" height="40" rx="2" fill="#b3d9f5" opacity="0.9"/>
+                    <text x="147" y="54" font-size="8" fill="#1a4a70" text-anchor="middle" font-family="Arial">ND</text>
+                    <rect x="125" y="75" width="45" height="40" rx="2" fill="#b3d9f5" opacity="0.9"/>
+                    <text x="147" y="99" font-size="8" fill="#1a4a70" text-anchor="middle" font-family="Arial">SD</text>
+                    <rect x="125" y="120" width="45" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="147" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">NE</text>
+                    <rect x="125" y="165" width="45" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="147" y="189" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">KS</text>
+                    <!-- Colorado / NM -->
+                    <rect x="100" y="120" width="20" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="110" y="144" font-size="6" fill="#fff" text-anchor="middle" font-family="Arial">CO</text>
+                    <rect x="100" y="165" width="20" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="110" y="189" font-size="6" fill="#fff" text-anchor="middle" font-family="Arial">NM</text>
+
+                    <!-- Midwest -->
+                    <rect x="175" y="30" width="45" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="197" y="54" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">MN</text>
+                    <rect x="175" y="75" width="45" height="40" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="197" y="99" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">IA</text>
+                    <rect x="175" y="120" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="197" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">MO</text>
+                    <rect x="175" y="165" width="45" height="55" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="197" y="196" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">TX</text>
+
+                    <!-- Great Lakes -->
+                    <rect x="225" y="30" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="247" y="54" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">WI</text>
+                    <rect x="225" y="75" width="45" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="247" y="99" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">IL</text>
+                    <rect x="225" y="120" width="45" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="247" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">IN</text>
+                    <rect x="225" y="165" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="247" y="189" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">AR</text>
+
+                    <!-- East -->
+                    <rect x="275" y="30" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="297" y="54" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">MI</text>
+                    <rect x="275" y="75" width="45" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="297" y="99" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">OH</text>
+                    <rect x="275" y="120" width="45" height="40" rx="2" fill="#1a5a8a" opacity="0.9"/>
+                    <text x="297" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">KY</text>
+                    <rect x="275" y="165" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="297" y="189" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">TN</text>
+
+                    <!-- Southeast -->
+                    <rect x="325" y="75" width="45" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="347" y="99" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">PA</text>
+                    <rect x="325" y="120" width="45" height="40" rx="2" fill="#1a5a8a" opacity="0.9"/>
+                    <text x="347" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">VA</text>
+                    <rect x="325" y="165" width="45" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="347" y="189" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">NC</text>
+
+                    <!-- Northeast -->
+                    <rect x="375" y="30" width="45" height="40" rx="2" fill="#1a5a8a" opacity="0.9"/>
+                    <text x="397" y="54" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">NY</text>
+                    <rect x="375" y="75" width="20" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="385" y="99" font-size="6" fill="#fff" text-anchor="middle" font-family="Arial">NJ</text>
+                    <rect x="400" y="75" width="20" height="20" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="410" y="89" font-size="6" fill="#fff" text-anchor="middle" font-family="Arial">CT</text>
+                    <rect x="400" y="100" width="20" height="15" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="410" y="111" font-size="6" fill="#1a4a70" text-anchor="middle" font-family="Arial">MA</text>
+                    <rect x="375" y="120" width="45" height="40" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="397" y="144" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">MD</text>
+                    <rect x="375" y="165" width="45" height="40" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="397" y="189" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">SC</text>
+
+                    <!-- AL / MS / GA / FL -->
+                    <rect x="300" y="210" width="35" height="35" rx="2" fill="#4a9ed4" opacity="0.9"/>
+                    <text x="317" y="231" font-size="7" fill="#fff" text-anchor="middle" font-family="Arial">AL</text>
+                    <rect x="340" y="210" width="35" height="35" rx="2" fill="#2878b4" opacity="0.9"/>
+                    <text x="357" y="231" font-size="7" fill="#fff" text-anchor="middle" font-family="Arial">GA</text>
+                    <rect x="380" y="210" width="35" height="55" rx="2" fill="#1a5a8a" opacity="0.9"/>
+                    <text x="397" y="241" font-size="7" fill="#fff" text-anchor="middle" font-family="Arial">FL</text>
+
+                    <!-- AK box -->
+                    <rect x="20" y="225" width="55" height="40" rx="2" fill="#b3d9f5" opacity="0.9"/>
+                    <text x="47" y="249" font-size="8" fill="#1a4a70" text-anchor="middle" font-family="Arial">AK</text>
+                    <!-- HI box -->
+                    <rect x="90" y="230" width="40" height="28" rx="2" fill="#7bbde8" opacity="0.9"/>
+                    <text x="110" y="248" font-size="8" fill="#fff" text-anchor="middle" font-family="Arial">HI</text>
+
+                    <!-- Legend -->
+                    <defs>
+                      <linearGradient id="mapGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#b3d9f5"/>
+                        <stop offset="100%" stop-color="#1a5a8a"/>
+                      </linearGradient>
+                    </defs>
+                    <rect x="20" y="272" width="100" height="5" rx="2" fill="url(#mapGrad)"/>
+                    <text x="20" y="268" font-size="7" fill="#999" font-family="Arial">Low usage</text>
+                    <text x="120" y="268" font-size="7" fill="#999" font-family="Arial" text-anchor="end">High usage</text>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="midfi-section" style="margin-top:10px">Storage Types at a Glance</div>
+            <div class="midfi-table-section">
+              <table class="midfi-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Size 2021</th>
+                    <th>2025 Forecast</th>
+                    <th>Past Growth</th>
+                    <th>Future Growth</th>
+                    <th>Recommendation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="seg-color" style="background:#a8d870"></span>Block Storage</td>
+                    <td>$19.8B</td>
+                    <td style="font-weight:600">$21.2B</td>
+                    <td><span class="mid-pill g">+7%</span></td>
+                    <td><span class="mid-pill a">+3%</span></td>
+                    <td style="color:#666">Stable. Maintain.</td>
+                  </tr>
+                  <tr>
+                    <td><span class="seg-color" style="background:#2d7550"></span>File Storage</td>
+                    <td>$10.4B</td>
+                    <td style="font-weight:600">$11.2B</td>
+                    <td><span class="mid-pill a">+1%</span></td>
+                    <td><span class="mid-pill r">-2%</span></td>
+                    <td style="color:#c0392b">Declining. Review.</td>
+                  </tr>
+                  <tr>
+                    <td><span class="seg-color" style="background:#4db870"></span>Object Storage</td>
+                    <td>$3.4B</td>
+                    <td style="font-weight:600">$4.5B</td>
+                    <td><span class="mid-pill g">+28%</span></td>
+                    <td><span class="mid-pill g">+10%</span></td>
+                    <td style="color:#2d7550">Strong growth. Invest.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="iter-note">
+      <strong>What changed and what was dropped:</strong> Color and real data were introduced. A geographic choropleth map was tested to show storage deployment by US region. The map was ultimately removed in the final version — it added visual complexity without giving the manager a clear action. The final design replaced it with a second chart row showing data-creation vs. capacity trends.
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

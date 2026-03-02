@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iteration 2 — Storage Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: #f0f0f0; color: #222; font-size: 14px; display: flex; }
+
+  .sidebar {
+    width: 210px; background: #1a1a1a; min-height: 100vh;
+    padding: 0; flex-shrink: 0; display: flex; flex-direction: column;
+  }
+  .sidebar-logo { padding: 20px 18px; border-bottom: 1px solid #333; }
+  .sidebar-logo .name { color: #fff; font-size: 15px; font-weight: 600; }
+  .sidebar-logo .sub  { color: #777; font-size: 11px; margin-top: 2px; }
+  .nav-label { color: #555; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 16px 18px 4px; }
+  .sidebar a { display: flex; align-items: center; gap: 9px; color: #999; text-decoration: none; padding: 9px 18px; font-size: 13px; }
+  .sidebar a i { width: 14px; font-size: 12px; }
+  .sidebar a:hover { color: #ddd; background: #2a2a2a; }
+  .sidebar a.active { color: #fff; background: #177a47; }
+  .sidebar-footer { margin-top: auto; padding: 14px 18px; border-top: 1px solid #333; color: #777; font-size: 12px; line-height: 1.5; }
+
+  .main { flex: 1; padding: 32px 36px; overflow-y: auto; }
+
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .page-header p  { color: #888; font-size: 13px; }
+  .header-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .btn { padding: 7px 14px; border-radius: 5px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #177a47; color: #fff; }
+  .btn-outline { background: #fff; color: #555; border: 1px solid #ccc; }
+
+  /* alert */
+  .alert {
+    background: #fff; border-left: 4px solid #cc0000;
+    border-radius: 5px; padding: 14px 16px; margin-bottom: 28px;
+    display: flex; gap: 12px; align-items: flex-start;
+    border: 1px solid #e5e5e5; border-left-width: 4px; border-left-color: #cc0000;
+  }
+  .alert i { color: #cc0000; margin-top: 2px; }
+  .alert-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .alert-body  { font-size: 12px; color: #666; }
+
+  /* kpi */
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #aaa; margin-bottom: 12px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .kpi-card {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 6px;
+    padding: 16px 18px; border-top: 3px solid #177a47;
+  }
+  .kpi-card .label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .kpi-card .value { font-size: 26px; font-weight: 700; color: #1a1a1a; line-height: 1; margin-bottom: 6px; }
+  .kpi-card .badge { font-size: 11px; font-weight: 500; }
+  .kpi-card .badge.up    { color: #177a47; }
+  .kpi-card .badge.down  { color: #cc0000; }
+  .kpi-card .badge.warn  { color: #d97706; }
+  .kpi-card .desc { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+  /* charts */
+  .charts-top { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .charts-bot { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 18px 20px; }
+  .card-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .card-sub   { font-size: 11px; color: #aaa; margin-bottom: 14px; }
+  .chart-wrap { position: relative; height: 180px; }
+
+  /* map */
+  .map-wrap { height: 180px; }
+  .map-svg  { width: 100%; height: 100%; }
+
+  /* insights */
+  .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  .insight {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .insight.red    { border-top: 3px solid #cc0000; }
+  .insight.green  { border-top: 3px solid #177a47; }
+  .insight.amber  { border-top: 3px solid #d97706; }
+  .insight-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }
+  .insight-title i { font-size: 12px; }
+  .insight-title i.red   { color: #cc0000; }
+  .insight-title i.green { color: #177a47; }
+  .insight-title i.amber { color: #d97706; }
+  .insight-body  { font-size: 12px; color: #666; line-height: 1.6; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; margin-top: 10px; }
+  .tag.red   { background: #fee2e2; color: #cc0000; }
+  .tag.green { background: #d1fae5; color: #177a47; }
+  .tag.amber { background: #fef3c7; color: #d97706; }
+
+  /* table */
+  .table-wrap { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: #f8f8f8; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #888; font-weight: 600; padding: 11px 14px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #444; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #fafafa; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; vertical-align: middle; }
+  .pill { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 3px; }
+  .pill.green { background: #d1fae5; color: #177a47; }
+  .pill.red   { background: #fee2e2; color: #cc0000; }
+  .pill.amber { background: #fef3c7; color: #d97706; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="name">BCG Dashboard</div>
+    <div class="sub">Manager View</div>
+  </div>
+  <div class="nav-label">Overview</div>
+  <a href="storage-dashboard-v2.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+  <a href="#"><i class="fa-solid fa-triangle-exclamation"></i> Alerts</a>
+  <a href="#"><i class="fa-solid fa-chart-line"></i> Trends</a>
+  <div class="nav-label">Storage</div>
+  <a href="#"><i class="fa-solid fa-hard-drive"></i> Block</a>
+  <a href="#"><i class="fa-solid fa-folder-open"></i> File</a>
+  <a href="#"><i class="fa-solid fa-box-archive"></i> Object</a>
+  <div class="nav-label">Design Process</div>
+  <a href="iteration1.html"><i class="fa-solid fa-1"></i> Iteration 1</a>
+  <a href="iteration2.html" class="active"><i class="fa-solid fa-2"></i> Iteration 2</a>
+  <div class="sidebar-footer">Rabii Lamharzi Alaoui<br>Middle Manager</div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <h1>Data Storage Dashboard</h1>
+    <p>Current performance and market outlook through 2025</p>
+    <div class="header-actions">
+      <button class="btn btn-outline"><i class="fa-regular fa-calendar"></i> 2021–2025</button>
+      <button class="btn btn-primary"><i class="fa-solid fa-download"></i> Export</button>
+    </div>
+  </div>
+
+  <div class="alert">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <div>
+      <div class="alert-title">Storage capacity may fall short within the next two years</div>
+      <div class="alert-body">Data creation is growing at 23% per year while storage capacity grows at 19%. Consider accelerating procurement before the next planning cycle.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Key Performance Indicators</div>
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="label">Total Market</div>
+      <div class="value">$37B</div>
+      <div class="badge up"><i class="fa-solid fa-arrow-up"></i> +5%/yr</div>
+      <div class="desc">Global enterprise storage by 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Object Growth</div>
+      <div class="value">+10%</div>
+      <div class="badge up"><i class="fa-solid fa-arrow-trend-up"></i> Fastest segment</div>
+      <div class="desc">Driven by AI and unstructured data</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Cloud Share</div>
+      <div class="value">41%</div>
+      <div class="badge warn"><i class="fa-solid fa-arrow-up"></i> Up from 36%</div>
+      <div class="desc">Of enterprise IT spend (2022)</div>
+    </div>
+    <div class="kpi-card" style="border-top-color:#cc0000">
+      <div class="label">Capacity Gap</div>
+      <div class="value" style="color:#cc0000">4 pts</div>
+      <div class="badge down"><i class="fa-solid fa-circle-exclamation"></i> Widening</div>
+      <div class="desc">Data grows 4 points faster than storage</div>
+    </div>
+  </div>
+
+  <div class="section-label">Market Breakdown</div>
+  <div class="charts-top">
+    <div class="card">
+      <div class="card-title">Storage Market by Segment</div>
+      <div class="card-sub">USD billions, 2016 to 2025 forecast (stacked)</div>
+      <div class="chart-wrap"><canvas id="marketChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Data Creation vs. Capacity</div>
+      <div class="card-sub">ZB — the growing gap, 2020 to 2025</div>
+      <div class="chart-wrap"><canvas id="gapChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-bot">
+    <div class="card">
+      <div class="card-title">Object vs. File Storage Growth</div>
+      <div class="card-sub">Grouped bar chart, 2019 to 2025</div>
+      <div class="chart-wrap"><canvas id="fileObjectChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cloud Adoption</div>
+      <div class="card-sub">% of enterprise IT spend, 2019–2022</div>
+      <div class="chart-wrap"><canvas id="cloudChart"></canvas></div>
+    </div>
+    <!-- US Regional map — explored here, dropped in final version -->
+    <div class="card">
+      <div class="card-title">Storage by US Region</div>
+      <div class="card-sub">Deployment intensity by state, 2022</div>
+      <div class="map-wrap">
+        <svg class="map-svg" viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- Row 1 -->
+          <rect x="8"   y="8"   width="22" height="22" rx="2" fill="#c3e6cb"/><text x="19" y="23" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">AK</text>
+          <!-- Row 2 -->
+          <rect x="8"   y="36"  width="22" height="22" rx="2" fill="#5cb85c"/><text x="19" y="51" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">WA</text>
+          <rect x="36"  y="36"  width="22" height="22" rx="2" fill="#a8d870"/><text x="47" y="51" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">MT</text>
+          <rect x="64"  y="36"  width="22" height="22" rx="2" fill="#a8d870"/><text x="75" y="51" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">ND</text>
+          <rect x="92"  y="36"  width="22" height="22" rx="2" fill="#4db870"/><text x="103" y="51" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">MN</text>
+          <rect x="120" y="36"  width="22" height="22" rx="2" fill="#4db870"/><text x="131" y="51" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">WI</text>
+          <rect x="148" y="36"  width="22" height="22" rx="2" fill="#2d7550"/><text x="159" y="51" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">MI</text>
+          <rect x="232" y="36"  width="22" height="22" rx="2" fill="#c3e6cb"/><text x="243" y="51" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">VT</text>
+          <rect x="260" y="36"  width="22" height="22" rx="2" fill="#c3e6cb"/><text x="271" y="51" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">ME</text>
+          <!-- Row 3 -->
+          <rect x="8"   y="64"  width="22" height="22" rx="2" fill="#5cb85c"/><text x="19" y="79" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">OR</text>
+          <rect x="36"  y="64"  width="22" height="22" rx="2" fill="#a8d870"/><text x="47" y="79" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">ID</text>
+          <rect x="64"  y="64"  width="22" height="22" rx="2" fill="#a8d870"/><text x="75" y="79" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">SD</text>
+          <rect x="92"  y="64"  width="22" height="22" rx="2" fill="#4db870"/><text x="103" y="79" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">IA</text>
+          <rect x="120" y="64"  width="22" height="22" rx="2" fill="#2d7550"/><text x="131" y="79" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">IL</text>
+          <rect x="148" y="64"  width="22" height="22" rx="2" fill="#2d7550"/><text x="159" y="79" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">IN</text>
+          <rect x="176" y="64"  width="22" height="22" rx="2" fill="#177a47"/><text x="187" y="79" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">OH</text>
+          <rect x="204" y="64"  width="22" height="22" rx="2" fill="#4db870"/><text x="215" y="79" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">PA</text>
+          <rect x="232" y="64"  width="22" height="22" rx="2" fill="#c3e6cb"/><text x="243" y="79" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">NH</text>
+          <!-- Row 4 -->
+          <rect x="8"   y="92"  width="22" height="22" rx="2" fill="#177a47"/><text x="19" y="107" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">CA</text>
+          <rect x="36"  y="92"  width="22" height="22" rx="2" fill="#5cb85c"/><text x="47" y="107" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">NV</text>
+          <rect x="64"  y="92"  width="22" height="22" rx="2" fill="#a8d870"/><text x="75" y="107" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">WY</text>
+          <rect x="92"  y="92"  width="22" height="22" rx="2" fill="#a8d870"/><text x="103" y="107" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">NE</text>
+          <rect x="120" y="92"  width="22" height="22" rx="2" fill="#4db870"/><text x="131" y="107" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">MO</text>
+          <rect x="148" y="92"  width="22" height="22" rx="2" fill="#4db870"/><text x="159" y="107" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">KY</text>
+          <rect x="176" y="92"  width="22" height="22" rx="2" fill="#5cb85c"/><text x="187" y="107" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">WV</text>
+          <rect x="204" y="92"  width="22" height="22" rx="2" fill="#5cb85c"/><text x="215" y="107" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">VA</text>
+          <rect x="232" y="92"  width="22" height="22" rx="2" fill="#c3e6cb"/><text x="243" y="107" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">MA</text>
+          <rect x="260" y="92"  width="22" height="22" rx="2" fill="#c3e6cb"/><text x="271" y="107" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">RI</text>
+          <!-- Row 5 -->
+          <rect x="36"  y="120" width="22" height="22" rx="2" fill="#5cb85c"/><text x="47" y="135" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">UT</text>
+          <rect x="64"  y="120" width="22" height="22" rx="2" fill="#a8d870"/><text x="75" y="135" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">CO</text>
+          <rect x="92"  y="120" width="22" height="22" rx="2" fill="#a8d870"/><text x="103" y="135" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">KS</text>
+          <rect x="120" y="120" width="22" height="22" rx="2" fill="#4db870"/><text x="131" y="135" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">TN</text>
+          <rect x="148" y="120" width="22" height="22" rx="2" fill="#4db870"/><text x="159" y="135" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">NC</text>
+          <rect x="176" y="120" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="187" y="135" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">MD</text>
+          <rect x="204" y="120" width="22" height="22" rx="2" fill="#5cb85c"/><text x="215" y="135" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">NY</text>
+          <rect x="232" y="120" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="243" y="135" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">CT</text>
+          <!-- Row 6 -->
+          <rect x="36"  y="148" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="47" y="163" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">AZ</text>
+          <rect x="64"  y="148" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="75" y="163" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">NM</text>
+          <rect x="92"  y="148" width="22" height="22" rx="2" fill="#a8d870"/><text x="103" y="163" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">OK</text>
+          <rect x="120" y="148" width="22" height="22" rx="2" fill="#a8d870"/><text x="131" y="163" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">AR</text>
+          <rect x="148" y="148" width="22" height="22" rx="2" fill="#4db870"/><text x="159" y="163" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">SC</text>
+          <rect x="176" y="148" width="22" height="22" rx="2" fill="#177a47"/><text x="187" y="163" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">DC</text>
+          <rect x="232" y="148" width="22" height="22" rx="2" fill="#2d7550"/><text x="243" y="163" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">NJ</text>
+          <!-- Row 7 -->
+          <rect x="92"  y="176" width="22" height="22" rx="2" fill="#4db870"/><text x="103" y="191" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">TX</text>
+          <rect x="120" y="176" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="131" y="191" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">LA</text>
+          <rect x="148" y="176" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="159" y="191" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">MS</text>
+          <rect x="176" y="176" width="22" height="22" rx="2" fill="#a8d870"/><text x="187" y="191" text-anchor="middle" font-size="6" fill="#333" font-family="Arial">AL</text>
+          <rect x="204" y="176" width="22" height="22" rx="2" fill="#5cb85c"/><text x="215" y="191" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">GA</text>
+          <!-- Row 8 -->
+          <rect x="148" y="204" width="22" height="22" rx="2" fill="#177a47"/><text x="159" y="219" text-anchor="middle" font-size="6" fill="#fff" font-family="Arial">FL</text>
+          <rect x="64"  y="204" width="22" height="22" rx="2" fill="#c3e6cb"/><text x="75" y="219" text-anchor="middle" font-size="6" fill="#155724" font-family="Arial">HI</text>
+          <!-- Legend -->
+          <text x="8" y="242" font-size="7" fill="#888" font-family="Arial">Low</text>
+          <rect x="30"  y="234" width="16" height="7" rx="1" fill="#c3e6cb"/>
+          <rect x="48"  y="234" width="16" height="7" rx="1" fill="#a8d870"/>
+          <rect x="66"  y="234" width="16" height="7" rx="1" fill="#5cb85c"/>
+          <rect x="84"  y="234" width="16" height="7" rx="1" fill="#4db870"/>
+          <rect x="102" y="234" width="16" height="7" rx="1" fill="#2d7550"/>
+          <rect x="120" y="234" width="16" height="7" rx="1" fill="#177a47"/>
+          <text x="140" y="242" font-size="7" fill="#888" font-family="Arial">High</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">What This Means for You</div>
+  <div class="insights">
+    <div class="insight red">
+      <div class="insight-title"><i class="fa-solid fa-triangle-exclamation red"></i> Capacity risk</div>
+      <div class="insight-body">Data creation is outpacing storage growth by 4 points per year. A shortfall is likely by 2024. Start capacity planning conversations now.</div>
+      <span class="tag red">Immediate attention needed</span>
+    </div>
+    <div class="insight green">
+      <div class="insight-title"><i class="fa-solid fa-arrow-trend-up green"></i> Invest in Object storage</div>
+      <div class="insight-body">Object storage is growing at 10% per year. File storage growth has turned negative. Redirecting budget toward Object storage is well-timed.</div>
+      <span class="tag green">Strategic opportunity</span>
+    </div>
+    <div class="insight amber">
+      <div class="insight-title"><i class="fa-solid fa-eye amber"></i> Review cloud contracts</div>
+      <div class="insight-body">Public cloud now represents 41% of enterprise IT spend. Assessing whether a hybrid model could reduce costs is worth pursuing.</div>
+      <span class="tag amber">Monitor closely</span>
+    </div>
+  </div>
+
+  <div class="section-label">Segment Summary</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Storage type</th>
+          <th>2021 size</th>
+          <th>2025 forecast</th>
+          <th>Past growth</th>
+          <th>Future growth</th>
+          <th>Market share</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dot" style="background:#a8d870"></span>Block Storage</td>
+          <td>$19.8B</td>
+          <td><strong>$21.2B</strong></td>
+          <td><span class="pill green"><i class="fa-solid fa-arrow-up"></i> +7%</span></td>
+          <td><span class="pill amber"><i class="fa-solid fa-arrow-right"></i> +3%</span></td>
+          <td>57%</td>
+          <td>Stable. Maintain current allocation.</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#2d7550"></span>File Storage</td>
+          <td>$10.4B</td>
+          <td><strong>$11.2B</strong></td>
+          <td><span class="pill amber"><i class="fa-solid fa-arrow-right"></i> +1%</span></td>
+          <td><span class="pill red"><i class="fa-solid fa-arrow-down"></i> -2%</span></td>
+          <td>30%</td>
+          <td style="color:#cc0000">Declining. Review usage and contracts.</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#4db870"></span>Object Storage</td>
+          <td>$3.4B</td>
+          <td><strong>$4.5B</strong></td>
+          <td><span class="pill green"><i class="fa-solid fa-arrow-up"></i> +28%</span></td>
+          <td><span class="pill green"><i class="fa-solid fa-arrow-up"></i> +10%</span></td>
+          <td>12%</td>
+          <td style="color:#177a47">Strong growth. Prioritize investment.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+Chart.defaults.font.family = 'IBM Plex Sans';
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#aaa';
+const grid = 'rgba(0,0,0,0.04)';
+
+new Chart(document.getElementById('marketChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'],
+    datasets: [
+      { label:'Block', data:[16.0,17.6,18.0,16.9,16.4,19.8,20.5,21.0,21.2,21.2], backgroundColor:'#a8d870', stack:'s', borderRadius:{topLeft:2,topRight:2}, borderSkipped:false },
+      { label:'File',  data:[7.1,7.8,9.8,9.6,9.3,10.4,10.8,11.1,11.2,11.2], backgroundColor:'#2d7550', stack:'s', borderSkipped:false },
+      { label:'Object',data:[1.0,1.3,1.9,2.6,2.8,3.4,3.8,4.2,4.5,4.5], backgroundColor:'#4db870', stack:'s', borderSkipped:false }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ x:{ stacked:true, grid:{color:grid} }, y:{ stacked:true, grid:{color:grid}, ticks:{ callback:v=>`$${v}B` } } } }
+});
+
+new Chart(document.getElementById('gapChart'), {
+  type: 'line',
+  data: {
+    labels: ['2020','2021','2022','2023','2024','2025'],
+    datasets: [
+      { label:'Data Created', data:[64,79,97,120,147,181], borderColor:'#a8d870', backgroundColor:'rgba(168,216,112,0.08)', pointRadius:4, tension:0.3, fill:true, borderWidth:2, yAxisID:'y' },
+      { label:'Capacity',     data:[7,8,9.5,10.8,12.5,16], borderColor:'#2d7550', backgroundColor:'rgba(45,117,80,0.07)', pointRadius:4, tension:0.3, fill:true, borderWidth:2, yAxisID:'y2' }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ mode:'index', intersect:false } }, scales:{ x:{ grid:{color:grid} }, y:{ position:'left', grid:{color:grid}, ticks:{ callback:v=>`${v} ZB` } }, y2:{ position:'right', grid:{display:false}, ticks:{ callback:v=>`${v} ZB` } } } }
+});
+
+new Chart(document.getElementById('fileObjectChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2019','2020','2021','2022','2023','2024','2025'],
+    datasets: [
+      { label:'File',   data:[12,12,12,13,14,15,16], backgroundColor:'#2d7550', borderRadius:3 },
+      { label:'Object', data:[12,16,17,20,22,25,28], backgroundColor:'#4db870', borderRadius:3 }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 } } } }, scales:{ x:{ grid:{color:grid} }, y:{ grid:{color:grid}, ticks:{ callback:v=>`$${v}B` } } } }
+});
+
+new Chart(document.getElementById('cloudChart'), {
+  type: 'line',
+  data: {
+    labels: ['2019','2020','2021','2022'],
+    datasets: [{ label:'Cloud share %', data:[36,38,39,41], borderColor:'#4db870', backgroundColor:'rgba(77,184,112,0.08)', pointRadius:5, tension:0.35, fill:true, borderWidth:2 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ x:{ grid:{color:grid} }, y:{ min:30, max:50, grid:{color:grid}, ticks:{ callback:v=>`${v}%` } } } }
+});
+</script>
+</body>
+</html>

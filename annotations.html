@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Annotations — BCG Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #f6f6f6;
+    --white: #ffffff;
+    --green: #177a47;
+    --green-light: #edf7f2;
+    --dark: #1a1a1a;
+    --charcoal: #3d3d3d;
+    --mid: #6b6b6b;
+    --light: #a0a0a0;
+    --border: #e2e2e2;
+    --border-light: #ebebeb;
+    --warn: #b45309;
+    --danger: #b91c1c;
+    --block: #1a4f91;
+    --file: #5b4fcf;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 232px; min-height: 100vh;
+    background: #161616;
+    border-right: 1px solid #2c2c2c;
+    display: flex; flex-direction: column;
+    flex-shrink: 0; position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar-logo {
+    padding: 26px 22px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-text { font-family: 'Libre Baskerville', serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .logo-sub { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.8px; text-transform: uppercase; }
+  .nav-group-label { font-size: 9px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,0.22); padding: 20px 22px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    padding: 9px 22px; font-size: 13px; font-weight: 400;
+    color: rgba(255,255,255,0.48); cursor: pointer;
+    border-left: 2px solid transparent; transition: all 0.12s;
+  }
+  .nav-item i { width: 16px; text-align: center; font-size: 12px; flex-shrink: 0; color: inherit; }
+  .nav-item:hover { color: rgba(255,255,255,0.82); background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: #fff; font-weight: 500; border-left-color: var(--green); background: rgba(23,122,71,0.16); }
+  .nav-item.active i { color: var(--green); }
+  .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
+  .sidebar-bottom { margin-top: auto; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,0.09); display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .user-name { font-size: 11px; font-weight: 500; color: #fff; line-height: 1.3; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.38); font-weight: 300; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; overflow-y: auto; padding: 36px 40px 60px; }
+
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--green); margin-bottom: 5px; }
+  .page-title { font-family: 'Libre Baskerville', serif; font-size: 27px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; line-height: 1.15; }
+  .page-sub { font-size: 13px; color: var(--mid); margin-top: 5px; font-weight: 300; font-style: italic; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0 32px; }
+
+  /* ── ANNOTATION LAYOUT ── */
+  .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .section-head-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--light); white-space: nowrap; }
+  .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .annotation-group { margin-bottom: 40px; }
+
+  .annotation-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+
+  .ann-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--dark); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    flex-shrink: 0; margin-top: 2px;
+    font-family: 'Libre Baskerville', serif;
+  }
+  .ann-num.green { background: var(--green); }
+  .ann-num.amber { background: var(--warn); }
+  .ann-num.red   { background: var(--danger); }
+  .ann-num.blue  { background: var(--block); }
+  .ann-num.purple { background: var(--file); }
+
+  .ann-body {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+
+  .ann-component {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--light);
+    margin-bottom: 4px;
+  }
+  .ann-decision {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 14px; font-weight: 700; color: var(--dark);
+    margin-bottom: 8px; line-height: 1.3;
+  }
+  .ann-rationale {
+    font-size: 12px; color: var(--mid); line-height: 1.7; font-weight: 400;
+  }
+  .ann-rationale strong { color: var(--charcoal); font-weight: 500; }
+
+  .ann-detail {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .ann-spec {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .ann-spec-label { font-size: 9px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--light); }
+  .ann-spec-val { font-size: 11px; color: var(--charcoal); font-weight: 500; }
+
+  /* color chips inline */
+  .color-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--charcoal);
+  }
+  .color-chip-dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.08); flex-shrink: 0; }
+
+  /* KPI reason table */
+  .kpi-reason-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .kpi-reason-table th {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--light); text-align: left; padding: 0 12px 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .kpi-reason-table td {
+    font-size: 12px; color: var(--charcoal); padding: 9px 12px 9px 0;
+    border-bottom: 1px solid var(--border-light); vertical-align: top; line-height: 1.5;
+  }
+  .kpi-reason-table tr:last-child td { border-bottom: none; }
+  .kpi-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 200 200" style="border-radius:5px;flex-shrink:0">
+      <path d="M0,0 H200 V200 H0 z" style="fill:#15734e;fill-rule:evenodd"/>
+      <path d="m72.28,83.63 c8.73,-12.24 27.23,-15.16 39.58,-6.83 c-2.07,3.05 -4,6.2 -6,9.3 c-6.04,-4.35 -14.77,-4.47 -20.76,0.03 c-7.17,4.87 -9.58,15.4 -4.84,22.76 c5.01,8.68 17.81,11.39 25.64,4.9 c6.69,-4.9 6.65,-13.85 8.88,-21.08 c2.68,-9.11 10.06,-16.91 19.3,-19.46 c8.32,-2.33 17.74,-1.22 24.93,3.73 c-2.03,3.07 -3.95,6.2 -5.92,9.3 c-4.28,-3.07 -9.95,-4.29 -15.06,-2.84 c-7.62,1.92 -13.18,9.66 -12.64,17.49 c0.18,8.7 7.79,16.55 16.59,16.54 c7.21,0.4 13.52,-4.98 15.64,-11.65 c-5.58,-0.07 -11.15,0.03 -16.72,-0.05 c1.89,-3.6 4.29,-6.89 6.44,-10.33 c7.3,0.03 14.61,-0.09 21.91,0.08 c1.38,10.08 -2.43,20.89 -10.68,27.06 c-12.05,9.63 -31.5,6.36 -40.07,-6.35 c-4.58,6.28 -11.65,10.8 -19.42,11.68 c-9.22,1.4 -18.87,-2.1 -25.19,-8.92 c-3.03,4.62 -8.22,7.85 -13.82,7.92 c-9.76,0.23 -19.55,0.34 -29.31,-0.04 c0.09,-17.87 0.06,-35.73 0.02,-53.6 c8.78,-0.03 17.56,-0.07 26.34,0.01 c6.46,0.13 13.02,4.07 15.16,10.35 zm-29.83,-0.26 c0.13,3.84 0.08,7.68 0.07,11.53 c4.52,-0.02 9.04,0.08 13.56,-0.02 c3.11,0.1 5.96,-2.79 5.7,-5.91 c0.11,-3.05 -2.69,-5.8 -5.72,-5.7 c-4.54,-0.08 -9.08,-0.09 -13.61,0.1 zm0.11,21.38 c-0.06,4.11 -0.05,8.21 0,12.32 c5.16,-0.04 10.32,0.06 15.47,-0.01 c3.07,0.17 6.2,-2.01 6.66,-5.12 c0.77,-3.47 -2.19,-6.94 -5.66,-7.08 c-5.48,-0.2 -10.98,0.04 -16.47,-0.11 z" style="fill:#fefefe;fill-rule:evenodd"/>
+    </svg>
+    <div>
+      <div class="logo-text">BCG Dashboard</div>
+      <div class="logo-sub">Manager View</div>
+    </div>
+  </div>
+
+  <span class="nav-group-label">Overview</span>
+  <a class="nav-item" href="storage-dashboard-v2.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-triangle-exclamation"></i> Alerts <span class="nav-badge">1</span></a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-chart-line"></i> Market Trends</a>
+
+  <span class="nav-group-label">Storage Types</span>
+  <a class="nav-item" href="#"><i class="fa-solid fa-hard-drive"></i> Block Storage</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-folder-open"></i> File Storage</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-box-archive"></i> Object Storage</a>
+
+  <span class="nav-group-label">Operations</span>
+  <a class="nav-item" href="#"><i class="fa-solid fa-cloud"></i> Cloud Migration</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-file-lines"></i> Reports</a>
+  <a class="nav-item" href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+
+  <span class="nav-group-label">Design Process</span>
+  <a class="nav-item" href="iterations.html"><i class="fa-solid fa-layer-group"></i> Iterations</a>
+  <a class="nav-item active" href="annotations.html"><i class="fa-solid fa-pen-ruler"></i> Annotations</a>
+
+  <div class="sidebar-bottom">
+    <div class="user-avatar">RL</div>
+    <div>
+      <div class="user-name">Rabii Lamharzi Alaoui</div>
+      <div class="user-role">Middle Manager</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="page-eyebrow">Design Process</div>
+  <div class="page-title">Design Annotations</div>
+  <div class="page-sub">Decision-by-decision rationale for every major design choice in the final dashboard</div>
+  <div class="divider"></div>
+
+  <!-- LAYOUT -->
+  <div class="annotation-group">
+    <div class="section-head"><div class="section-head-title">Layout and Structure</div></div>
+
+    <div class="annotation-item">
+      <div class="ann-num">1</div>
+      <div class="ann-body">
+        <div class="ann-component">Overall Layout</div>
+        <div class="ann-decision">Fixed sidebar with scrollable main content area</div>
+        <div class="ann-rationale">
+          A management dashboard is navigated repeatedly across sessions. A persistent sidebar keeps the navigation always visible without taking up vertical real estate in the content area. The main content scrolls independently, which means charts and tables are never hidden behind a nav. <strong>The sidebar width is fixed at 232px</strong>, leaving the majority of the screen for data.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Sidebar width</div><div class="ann-spec-val">232px fixed</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Sidebar bg</div><div class="ann-spec-val">#161616</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Content padding</div><div class="ann-spec-val">40px horizontal, 36px top</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num">2</div>
+      <div class="ann-body">
+        <div class="ann-component">Page Header</div>
+        <div class="ann-decision">Three-level header: eyebrow label, title, and subtitle</div>
+        <div class="ann-rationale">
+          The eyebrow ("BCG Analysis") grounds the dashboard in its source context. The title names the view. The subtitle sets temporal scope without cluttering the title itself. This three-level pattern allows each line to carry a distinct type of information and creates a clean reading hierarchy before any data appears.
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num">3</div>
+      <div class="ann-body">
+        <div class="ann-component">Section Headers</div>
+        <div class="ann-decision">All-caps muted label with a trailing hairline rule</div>
+        <div class="ann-rationale">
+          Section headers serve as chapter markers, not headings competing for attention. Using all-caps, muted grey text and a 1px rule keeps them structurally present without visual weight. A heavier treatment (such as serif bold or colored accent bars) was tried in an earlier iteration and consistently drew the eye away from the data it was meant to introduce.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Font</div><div class="ann-spec-val">IBM Plex Sans 11px / 600</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Color</div><div class="ann-spec-val">#a0a0a0</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Rule</div><div class="ann-spec-val">1px #e2e2e2</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI SELECTION -->
+  <div class="annotation-group">
+    <div class="section-head"><div class="section-head-title">KPI Selection</div></div>
+
+    <div class="annotation-item">
+      <div class="ann-num green">4</div>
+      <div class="ann-body">
+        <div class="ann-component">KPI Cards</div>
+        <div class="ann-decision">Four KPIs selected to cover market size, growth direction, spend shift, and risk</div>
+        <div class="ann-rationale">
+          Each KPI was chosen because it requires a different type of response from the manager: monitoring, investing, renegotiating, or acting urgently. Together they give a complete picture in four numbers.
+        </div>
+        <table class="kpi-reason-table">
+          <thead>
+            <tr>
+              <th>KPI</th>
+              <th>Value</th>
+              <th>Why it was included</th>
+              <th>Required action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="kpi-dot" style="background:#1a4f91"></span>Market Size</td>
+              <td style="font-weight:500">$37B</td>
+              <td>Sets the scale of the market the manager operates in</td>
+              <td style="color:var(--mid)">Context only</td>
+            </tr>
+            <tr>
+              <td><span class="kpi-dot" style="background:#177a47"></span>Object Storage Growth</td>
+              <td style="font-weight:500">+10%</td>
+              <td>Fastest growing segment signals where to direct investment</td>
+              <td style="color:var(--green)">Allocate budget</td>
+            </tr>
+            <tr>
+              <td><span class="kpi-dot" style="background:#b45309"></span>Public Cloud Share</td>
+              <td style="font-weight:500">41%</td>
+              <td>Structural shift in spend that affects contract strategy</td>
+              <td style="color:var(--warn)">Review contracts</td>
+            </tr>
+            <tr>
+              <td><span class="kpi-dot" style="background:#b91c1c"></span>Capacity Gap</td>
+              <td style="font-weight:500">4 pts</td>
+              <td>Risk indicator that compounds annually if unaddressed</td>
+              <td style="color:var(--danger)">Act this quarter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num green">5</div>
+      <div class="ann-body">
+        <div class="ann-component">KPI Card Design</div>
+        <div class="ann-decision">No colored backgrounds, no accent bars. Status communicated through text color and badge only.</div>
+        <div class="ann-rationale">
+          Earlier iterations used filled colored badge backgrounds and colored bottom accent bars on each KPI card. These were removed because they created visual noise that competed with the chart section below. Status color applied to text alone (the badge value and the trend icon) is sufficient to communicate urgency without cluttering the card surface.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Metric value</div><div class="ann-spec-val">Libre Baskerville 31px Bold</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Icon</div><div class="ann-spec-val">Plain grey, no background tile</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Badge</div><div class="ann-spec-val">Outlined, no fill</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="annotation-group">
+    <div class="section-head"><div class="section-head-title">Data Visualization</div></div>
+
+    <div class="annotation-item">
+      <div class="ann-num blue">6</div>
+      <div class="ann-body">
+        <div class="ann-component">Chart 1 — Storage Market by Type</div>
+        <div class="ann-decision">Stacked bar chart with a 2:1 column ratio to the cloud chart</div>
+        <div class="ann-rationale">
+          A stacked bar was chosen over a grouped bar because the manager needs to see both the total market size and the composition of that total simultaneously. Grouped bars would require the eye to compare across groups to estimate totals. The 2:1 width ratio reflects that this chart carries more information and context than the cloud adoption chart beside it.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Block color</div><div class="ann-spec-val"><span class="color-chip"><span class="color-chip-dot" style="background:#1a4f91"></span>#1A4F91</span></div></div>
+          <div class="ann-spec"><div class="ann-spec-label">File color</div><div class="ann-spec-val"><span class="color-chip"><span class="color-chip-dot" style="background:#5b4fcf"></span>#5B4FCF</span></div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Object color</div><div class="ann-spec-val"><span class="color-chip"><span class="color-chip-dot" style="background:#177a47"></span>#177A47</span></div></div>
+          <div class="ann-spec"><div class="ann-spec-label">These colors</div><div class="ann-spec-val">Consistent across all charts</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num blue">7</div>
+      <div class="ann-body">
+        <div class="ann-component">Chart 2 — Public Cloud Spend</div>
+        <div class="ann-decision">Area line chart with amber color to signal a monitoring situation</div>
+        <div class="ann-rationale">
+          The line chart with a light fill communicates a trend over time clearly for a single metric. Amber was chosen rather than green or red because cloud growth is not inherently good or bad for the manager — it is a shift that requires attention and strategic response. The color nudges the reader toward watchfulness rather than alarm or celebration.
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num red">8</div>
+      <div class="ann-body">
+        <div class="ann-component">Chart 3 — Data vs Capacity</div>
+        <div class="ann-decision">Dual Y-axis line chart using red for data creation and blue for storage capacity</div>
+        <div class="ann-rationale">
+          The two metrics (data created in zettabytes vs storage capacity in zettabytes) have vastly different scales, making a shared axis misleading. A dual axis was used intentionally, with each axis label color-matched to its line so the reader does not need a legend to understand which axis belongs to which series. Red signals risk (the growing gap), blue signals the resource that needs to keep up.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Left axis</div><div class="ann-spec-val">Data created (red)</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Right axis</div><div class="ann-spec-val">Storage capacity (blue)</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Axis label colors</div><div class="ann-spec-val">Match their respective lines</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num purple">9</div>
+      <div class="ann-body">
+        <div class="ann-component">Chart 4 — File vs Object Storage</div>
+        <div class="ann-decision">Grouped bar chart showing the two segments side by side</div>
+        <div class="ann-rationale">
+          A grouped bar rather than a stacked bar was chosen here because the message is about the relative growth of two competing segments, not their combined total. The subtitle states the conclusion directly ("Object is growing at nearly three times the rate of File") so the chart becomes evidence for a decision rather than a data display.
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num blue">10</div>
+      <div class="ann-body">
+        <div class="ann-component">Chart Card Header</div>
+        <div class="ann-decision">Card header includes a bottom border separating metadata from the chart canvas</div>
+        <div class="ann-rationale">
+          The title, subtitle, and legend are information about the chart. The canvas is the chart itself. A 1px separator between the two makes the card feel well-organized and prevents the legend from visually blending into the chart area. This also creates a consistent reading pattern: read the heading to understand what you are looking at, then look at the chart.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERT AND INSIGHTS -->
+  <div class="annotation-group">
+    <div class="section-head"><div class="section-head-title">Alert Banner and Insight Cards</div></div>
+
+    <div class="annotation-item">
+      <div class="ann-num red">11</div>
+      <div class="ann-body">
+        <div class="ann-component">Alert Banner</div>
+        <div class="ann-decision">Placed above KPIs, white background, red left border only</div>
+        <div class="ann-rationale">
+          The alert is the first thing a manager should see if something requires action. Placing it above the KPI row ensures it is read before any data. A white background with a 3px red left border communicates urgency without being visually overwhelming — it is a signal, not an alarm. The alert text is written as a plain statement of risk followed by a concrete recommendation.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Background</div><div class="ann-spec-val">White</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Border</div><div class="ann-spec-val">1px #e2e2e2 + 3px red left</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Usage</div><div class="ann-spec-val">Maximum one per view</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num green">12</div>
+      <div class="ann-body">
+        <div class="ann-component">Insight Cards — "What This Means for You"</div>
+        <div class="ann-decision">Three insight cards placed after charts, with colored top border indicating priority</div>
+        <div class="ann-rationale">
+          Charts show what is happening. Insight cards tell the manager what to do about it. Placing them after the charts means the reader has context before reaching the recommendations. The 3px top border encodes priority at a glance: red for immediate action, green for opportunity, amber for ongoing monitoring. Each card ends with a short priority tag that reinforces this reading.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Red card</div><div class="ann-spec-val">Immediate attention needed</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Green card</div><div class="ann-spec-val">Strategic opportunity</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Amber card</div><div class="ann-spec-val">Monitor closely</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY AND COLOR -->
+  <div class="annotation-group">
+    <div class="section-head"><div class="section-head-title">Typography and Color System</div></div>
+
+    <div class="annotation-item">
+      <div class="ann-num">13</div>
+      <div class="ann-body">
+        <div class="ann-component">Typography</div>
+        <div class="ann-decision">Two typefaces only: Libre Baskerville for display, IBM Plex Sans for UI</div>
+        <div class="ann-rationale">
+          Libre Baskerville is used exclusively for elements that carry the most important information: the page title, card titles, and KPI metric values. Its serif character signals authority and makes large numbers more legible at a glance. IBM Plex Sans handles everything else. This strict two-typeface rule prevents visual fragmentation and gives each typeface a clear role.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Display / values</div><div class="ann-spec-val">Libre Baskerville</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">UI / body / labels</div><div class="ann-spec-val">IBM Plex Sans</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Min size</div><div class="ann-spec-val">10px (axis ticks only)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num">14</div>
+      <div class="ann-body">
+        <div class="ann-component">Color System</div>
+        <div class="ann-decision">Neutral background, one brand green, three semantic status colors</div>
+        <div class="ann-rationale">
+          Color is used for meaning only, not decoration. The neutral grey background (#f6f6f6) ensures white cards stand out cleanly without any warm or cool bias. The brand green (#177A47) appears in active nav states, the logo, and positive indicators. Red, amber, and blue-purple are reserved for status encoding only and appear consistently in the same roles across charts, KPIs, pills, and insight cards.
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#f6f6f6;border:1px solid #e2e2e2"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Page bg</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#ffffff;border:1px solid #e2e2e2"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Card bg</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#e2e2e2"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Border</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#177a47"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Brand</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#b91c1c"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Danger</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#b45309"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Warning</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#1a4f91"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">Block</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:#5b4fcf"></div>
+            <div style="font-size:9px;color:var(--light);text-align:center">File</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-item">
+      <div class="ann-num">15</div>
+      <div class="ann-body">
+        <div class="ann-component">Table Design</div>
+        <div class="ann-decision">No card wrapper. Table has its own outer border and owns its container.</div>
+        <div class="ann-rationale">
+          The segment comparison table is the densest component on the page and benefits from being clearly bounded. Rather than floating inside a generic card, it has its own 1px border with a border-radius, a slightly shaded header row, and consistent left padding matching the rest of the page. The inline bar spark in the "Share by 2025" column adds a visual dimension to the percentage without requiring a separate chart.
+        </div>
+        <div class="ann-detail">
+          <div class="ann-spec"><div class="ann-spec-label">Header row bg</div><div class="ann-spec-val">#fafafa</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Row divider</div><div class="ann-spec-val">1px #ebebeb</div></div>
+          <div class="ann-spec"><div class="ann-spec-label">Spark bar width</div><div class="ann-spec-val">100px, 5px height</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

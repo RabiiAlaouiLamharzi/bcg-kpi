@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iteration 1 — Storage Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; font-size: 14px; display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px; background: #222; min-height: 100vh;
+    padding: 20px 0; flex-shrink: 0; display: flex; flex-direction: column;
+  }
+  .sidebar-title { color: #fff; font-size: 15px; font-weight: bold; padding: 0 16px 18px; border-bottom: 1px solid #444; margin-bottom: 10px; }
+  .sidebar a { display: block; color: #aaa; text-decoration: none; padding: 8px 16px; font-size: 13px; }
+  .sidebar a:hover { color: #fff; background: #333; }
+  .sidebar a.active { color: #fff; background: #177a47; }
+  .sidebar-section { color: #666; font-size: 10px; text-transform: uppercase; padding: 14px 16px 4px; letter-spacing: 1px; }
+  .sidebar-bottom { padding: 16px; border-top: 1px solid #444; margin-top: auto; color: #aaa; font-size: 12px; line-height: 1.5; }
+
+  /* MAIN */
+  .main { flex: 1; padding: 30px 32px 48px; overflow-y: auto; }
+
+  h1 { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+  .subtitle { color: #888; font-size: 13px; margin-bottom: 22px; }
+
+  /* ALERT */
+  .alert-box {
+    background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #f59e0b;
+    border-radius: 4px; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #856404;
+  }
+  .alert-box strong { display: block; margin-bottom: 3px; }
+
+  /* SECTION */
+  .section-title { font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; margin-top: 28px; }
+
+  /* KPIs */
+  .kpi-row { display: flex; gap: 14px; margin-bottom: 0; }
+  .kpi-box {
+    flex: 1; background: #fff; border: 1px solid #ddd; border-radius: 4px;
+    padding: 16px; text-align: center;
+  }
+  .kpi-box .label { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+  .kpi-box .value { font-size: 26px; font-weight: bold; color: #177a47; }
+  .kpi-box .change { font-size: 12px; color: #888; margin-top: 4px; }
+
+  /* CHARTS */
+  .charts-row { display: flex; gap: 14px; margin-bottom: 0; }
+  .chart-box {
+    flex: 1; background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 16px;
+  }
+  .chart-box h3 { font-size: 13px; color: #444; margin-bottom: 4px; }
+  .chart-box p  { font-size: 11px; color: #aaa; margin-bottom: 12px; }
+  .chart-canvas-wrap { position: relative; height: 210px; }
+
+  /* TABLE */
+  .table-wrap { background: #fff; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #eeeeee; font-size: 11px; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid #ddd; color: #666; letter-spacing: 0.4px; }
+  td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-title">BCG Dashboard</div>
+  <div class="sidebar-section">Menu</div>
+  <a href="storage-dashboard-v2.html">Dashboard</a>
+  <a href="#">Alerts</a>
+  <a href="#">Reports</a>
+  <a href="#">Settings</a>
+  <div class="sidebar-section">Design Process</div>
+  <a href="iteration1.html" class="active">Iteration 1</a>
+  <a href="iteration2.html">Iteration 2</a>
+  <div class="sidebar-bottom">Rabii Lamharzi Alaoui<br>Middle Manager</div>
+</div>
+
+<div class="main">
+  <h1>Storage Dashboard</h1>
+  <div class="subtitle">Data storage overview — 2021 to 2025</div>
+
+  <div class="alert-box">
+    <strong>Warning: Capacity gap detected</strong>
+    Data is growing at 23%/year but storage only grows at 19%. There may be a shortfall by 2024.
+  </div>
+
+  <div class="section-title">KPIs</div>
+  <div class="kpi-row">
+    <div class="kpi-box">
+      <div class="label">Total Market</div>
+      <div class="value">$37B</div>
+      <div class="change">By 2025</div>
+    </div>
+    <div class="kpi-box">
+      <div class="label">Object Storage Growth</div>
+      <div class="value">+10%</div>
+      <div class="change">Per year</div>
+    </div>
+    <div class="kpi-box">
+      <div class="label">Cloud Share</div>
+      <div class="value">41%</div>
+      <div class="change">Of IT spend</div>
+    </div>
+    <div class="kpi-box">
+      <div class="label">Capacity Gap</div>
+      <div class="value" style="color:#cc0000">4 pts</div>
+      <div class="change">Data vs. storage growth</div>
+    </div>
+  </div>
+
+  <div class="section-title">Charts</div>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h3>Market by Storage Type (USD B)</h3>
+      <p>Stacked by Block, File and Object — 2019 to 2025</p>
+      <div class="chart-canvas-wrap"><canvas id="marketChart"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>Data Created vs. Storage Capacity (ZB)</h3>
+      <p>Data creation is growing much faster than available capacity</p>
+      <div class="chart-canvas-wrap"><canvas id="gapChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-title">Segment Summary</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>2021 Size</th>
+          <th>2025 Forecast</th>
+          <th>Growth (past)</th>
+          <th>Growth (future)</th>
+          <th>Market share</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Block Storage</td>
+          <td>$19.8B</td>
+          <td>$21.2B</td>
+          <td style="color:green">+7%</td>
+          <td style="color:orange">+3%</td>
+          <td>57%</td>
+          <td>Maintain</td>
+        </tr>
+        <tr>
+          <td>File Storage</td>
+          <td>$10.4B</td>
+          <td>$11.2B</td>
+          <td style="color:orange">+1%</td>
+          <td style="color:red">-2%</td>
+          <td>30%</td>
+          <td>Review contracts</td>
+        </tr>
+        <tr>
+          <td>Object Storage</td>
+          <td>$3.4B</td>
+          <td>$4.5B</td>
+          <td style="color:green">+28%</td>
+          <td style="color:green">+10%</td>
+          <td>12%</td>
+          <td>Invest more</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+Chart.defaults.font.family = 'Arial';
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#888';
+
+new Chart(document.getElementById('marketChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2019','2020','2021','2022','2023','2024','2025'],
+    datasets: [
+      { label: 'Block', data: [16.9,16.4,19.8,20.5,21.0,21.2,21.2], backgroundColor: '#4472C4', stack: 's' },
+      { label: 'File',  data: [9.6,9.3,10.4,10.8,11.1,11.2,11.2],   backgroundColor: '#ED7D31', stack: 's' },
+      { label: 'Object',data: [2.6,2.8,3.4,3.8,4.2,4.5,4.5],         backgroundColor: '#A9D18E', stack: 's' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+    scales: {
+      x: { stacked: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+      y: { stacked: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => '$' + v + 'B' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('gapChart'), {
+  type: 'line',
+  data: {
+    labels: ['2020','2021','2022','2023','2024','2025'],
+    datasets: [
+      { label: 'Data Created (ZB)', data: [64,79,97,120,147,181], borderColor: '#FF0000', backgroundColor: 'rgba(255,0,0,0.05)', tension: 0.3, fill: true, pointRadius: 4, borderWidth: 2, yAxisID: 'y' },
+      { label: 'Storage Cap. (ZB)', data: [7,8,9.5,10.8,12.5,16],  borderColor: '#0070C0', backgroundColor: 'rgba(0,112,192,0.05)', tension: 0.3, fill: true, pointRadius: 4, borderWidth: 2, yAxisID: 'y2' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: { mode: 'index', intersect: false }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(0,0,0,0.04)' } },
+      y:  { position: 'left',  grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + ' ZB', color: '#FF0000' } },
+      y2: { position: 'right', grid: { display: false },             ticks: { callback: v => v + ' ZB', color: '#0070C0' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
